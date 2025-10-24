@@ -81,3 +81,74 @@ def run_simulation(num_riders, order_rate, delivery_time_mean=15):
         "Rider Utilization (%)": round(utilization, 2),
         "Orders Completed": orders_completed,
     }
+    
+# MAIN EXECUTION: TEST SCENARIOS
+def main():
+    print("=== Food Delivery Dispatch System Simulation ===\n")
+
+    scenarios = {
+        "A - Base Case": {"riders": 5, "order_rate": 0.6},    # Normal operation
+        "B - More Riders": {"riders": 8, "order_rate": 0.6},  # Increased resources
+        "C - High Demand": {"riders": 5, "order_rate": 1.2},  # High demand
+    }
+
+    results = {}
+
+    for name, params in scenarios.items():
+        print(f"Running Scenario {name}...")
+        metrics = run_simulation(
+            num_riders=params["riders"],
+            order_rate=params["order_rate"],
+        )
+        results[name] = metrics
+
+    # Display Results Summary
+    print("\n--- Simulation Results Summary ---")
+    for name, data in results.items():
+        print(f"\n{name}")
+        for k, v in data.items():
+            print(f"{k:25}: {v}")
+
+    # Visualization
+    labels = list(results.keys())
+    wait_times = [results[k]["Avg Wait Time (min)"] for k in labels]
+    utilization = [results[k]["Rider Utilization (%)"] for k in labels]
+    delivery_times = [results[k]["Avg Delivery Time (min)"] for k in labels]
+
+    # Bar chart - Average Wait Time
+    plt.figure(figsize=(8, 5))
+    plt.bar(labels, wait_times, color='skyblue')
+    plt.title("Average Wait Time by Scenario")
+    plt.xlabel("Scenario")
+    plt.ylabel("Average Wait Time (minutes)")
+    plt.grid(True, linestyle='--', alpha=0.6)
+    plt.tight_layout()
+    plt.show()
+
+    # Line chart - Rider Utilization
+    plt.figure(figsize=(8, 5))
+    plt.plot(labels, utilization, marker='o', color='green')
+    plt.title("Rider Utilization Comparison")
+    plt.xlabel("Scenario")
+    plt.ylabel("Rider Utilization (%)")
+    plt.grid(True, linestyle='--', alpha=0.6)
+    plt.tight_layout()
+    plt.show()
+
+    # Bar chart - Average Delivery Time
+    plt.figure(figsize=(8, 5))
+    plt.bar(labels, delivery_times, color='orange')
+    plt.title("Average Delivery Time by Scenario")
+    plt.xlabel("Scenario")
+    plt.ylabel("Average Delivery Time (minutes)")
+    plt.grid(True, linestyle='--', alpha=0.6)
+    plt.tight_layout()
+    plt.show()
+    
+    df = pd.DataFrame(results).T
+    df.to_csv("simulation_results.csv")
+
+
+
+if __name__ == "__main__":
+    main()
