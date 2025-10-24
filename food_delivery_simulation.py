@@ -58,3 +58,26 @@ class FoodDeliverySystem:
             yield self.env.timeout(interarrival)
             order_id += 1
             self.env.process(self.process_order(order_id))
+
+# SIMULATION RUNNER
+def run_simulation(num_riders, order_rate, delivery_time_mean=15):
+    """Run the simulation and return performance metrics."""
+    random.seed(RANDOM_SEED)
+    env = simpy.Environment()
+    system = FoodDeliverySystem(env, num_riders, delivery_time_mean, order_rate)
+    env.process(system.generate_orders())
+    env.run(until=SIM_TIME)
+
+    avg_wait = statistics.mean(system.wait_times) if system.wait_times else 0
+    avg_delivery = statistics.mean(system.delivery_times) if system.delivery_times else 0
+    utilization = (system.busy_time / (SIM_TIME * num_riders)) * 100
+    orders_completed = len(system.delivery_times)
+
+    return {
+        "Riders": num_riders,
+        "Order Rate": round(order_rate, 2),
+        "Avg Wait Time (min)": round(avg_wait, 2),
+        "Avg Delivery Time (min)": round(avg_delivery, 2),
+        "Rider Utilization (%)": round(utilization, 2),
+        "Orders Completed": orders_completed,
+    }
